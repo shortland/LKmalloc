@@ -169,7 +169,7 @@ void *_lk_find_malloc_table_with_ptr_before_time(void *needle, unsigned long bef
 
 void _lk_print_malloc_table(FILE *out, MALLOCS_TABLE *table)
 {
-    fprintf(out, "0,%s,%s,%d,%lu,\"%p\",%d,%llu,\"%p\"\n", table->file, table->func, table->line, table->microseconds, table->orig_ptr, 0, table->malloc_size, table->malloc_ptr);
+    fprintf(out, "0,%s,%s,%d,%lu,\"%p\",%d,%lu,\"%p\"\n", table->file, table->func, table->line, table->microseconds, table->orig_ptr, 0, table->malloc_size, table->malloc_ptr);
 
     // fprintf(out, "\tlkmalloc() called with pointer '%p' in %s:%s line: %d\n", table->malloc_ptr, table->file, table->func, table->line);
     // fprintf(out, "\t with timestamp %d (seconds) or %lu (microseconds)\n", table->timestamp, table->microseconds);
@@ -187,7 +187,7 @@ void _lk_print_free_table(FILE *out, FREES_TABLE *table)
     }
 
     fprintf(out, "1,%s,%s,%d,%lu,\"%p\",%d,0x%x,%s\n", table->file, table->func, table->line, table->microseconds, table->orig_ptr, 0, table->free_flags, "");
-
+    ptr = ptr;
     // fprintf(out, "\tlkfree() called with pointer '%p' in %s:%s line: %d\n", ptr, table->file, table->func, table->line);
     // fprintf(out, "\t with timestamp %d (seconds) or %lu (microseconds)\n", table->timestamp, table->microseconds);
     return;
