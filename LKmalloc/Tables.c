@@ -458,6 +458,7 @@ void write_csv_header(FILE *out)
     if (wrote_csv_header == 0)
     {
         wrote_csv_header = 1;
-        fprintf(out, "record_type,filename,fxname,line_num,timestamp,ptr_passed,retval,size_or_flags,alloc_addr_returned\n");
+	setbuf(out, NULL);
+	fprintf(out, "record_type,filename,fxname,line_num,timestamp,ptr_passed,retval,size_or_flags,alloc_addr_returned\n");
     }
 }
