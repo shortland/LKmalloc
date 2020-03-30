@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "LKmalloc.h"
+#include "LKmalloc.c"
 
 int main(int argc, char *argv[])
 {

@@ -1,60 +1,31 @@
-EXEC := someprog
+EXEC := testsuite
 
 CC := gcc
 
-ROOT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-
-# THIS IS WHERE LKmalloc,... are linked from
-LKD := $(ROOT_DIR)/LKmalloc/
 SRCD := src
 BLDD := build
-INCD := include
-# TSTD := test
+TSTD := tests
 
-MAIN  := $(BLDD)/main.o
+.PHONY: clean depend all tests
 
-ALL_SRCF := $(shell find $(SRCD) -type f -name *.c)
-ALL_OBJF := $(patsubst $(SRCD)/%,$(BLDD)/%,$(ALL_SRCF:.c=.o))
-ALL_FUNCF := $(filter-out $(MAIN) $(AUX), $(ALL_OBJF))
+depend: setup $(BLDD)/LKmalloc.a
 
-# TEST_SRC := $(shell find $(TSTD) -type f -name *.sh)
+$(BLDD)/LKmalloc.a: $(BLDD)/LKmalloc.o $(BLDD)/Tables.o
+	ar rcs $@ $^
 
-INC := -I $(INCD) -I $(LKD)
-# INC := -I $(INCD)
+$(BLDD)/LKmalloc.o: $(BLDD)/LKmalloc.c $(BLDD)/Tables.c $(BLDD)/Tables.h $(BLDD)/Flags.h
+	gcc -c -o $@ $<
 
-CFLAGS := -Wall -Werror -Wno-unused-variable -Wno-unused-function -MMD
-
-STD := -std=gnu11
-# LIBS := -lLKmalloc
-
-CFLAGS += $(STD)
-
-# .PHONY: clean all tests
-.PHONY: clean all
+$(BLDD)/Tables.o: $(BLDD)/Tables.c $(BLDD)/Tables.h $(BLDD)/Flags.h
+	gcc -c -o $@ $<
 
 all: setup $(EXEC)
 
-setup: $(BLDD)
+setup: $(BLDD) readylib
+
+readylk:
+	mv ../LKmalloc/* $(BLDD)/
 
 $(BLDD):
 	mkdir -p $(BLDD)
 
-$(EXEC): $(ALL_OBJF)
-	$(CC) $^ -o $@
-	# $(CC) $^ -o $@ $(LIBS)
-
-# TESTS=test/test_setup.sh test/test_decryption.sh test/test_encryption.sh test/test_fidelity.sh
-# tests: $(EXEC) $(TESTS)
-# 	sh test/test_setup.sh
-# 	sh test/test_decryption.sh
-# 	sh test/test_encryption.sh
-# 	sh test/test_fidelity.sh
-
-$(BLDD)/%.o: $(SRCD)/%.c
-	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
-
-clean:
-	rm -rf $(BLDD) $(EXEC)
-
-.PRECIOUS: $(BLDD)/*.d
--include $(BLDD)/*.d

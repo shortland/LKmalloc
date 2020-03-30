@@ -1,18 +1,18 @@
 TARGET = prog
 
-$(TARGET): main.o lib.a
+$(TARGET): main.o LKmalloc.a
 	gcc $^ -o $@
 
 main.o: main.c
 	gcc -c $< -o $@
 
-lib.a: lib1.o lib2.o
+LKmalloc.a: LKmalloc.o Tables.o
 	ar rcs $@ $^
 
-lib1.o: lib1.c lib1.h
+LKmalloc.o: LKmalloc.c Tables.c Tables.h Flags.h
 	gcc -c -o $@ $<
 
-lib2.o: lib2.c lib2.h
+Tables.o: Tables.c Tables.h Flags.h
 	gcc -c -o $@ $<
 
 clean:

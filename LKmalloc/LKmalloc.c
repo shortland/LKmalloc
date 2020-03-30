@@ -5,17 +5,12 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
-#include "LKmalloc.h"
 #include "Tables.c"
 #include "Flags.h"
 
-/**
- * Report wrapper - used for atexit().
- */
-void lkreport_wrapper()
-{
-    lkreport(fileno(stderr), LKR_SERIOUS | LKR_BAD_FREE);
-}
+#define lkmalloc(size, ptr, flags) __lkmalloc_internal((size), (ptr), (flags), __FILE__, __func__, __LINE__)
+
+#define lkfree(ptr, flags) __lkfree_internal((ptr), (flags), __FILE__, __func__, __LINE__, NULL, (flags))
 
 /**
  * This will ask to allocate "size" bytes, and if successful, assign the newly allocated address to *ptr. 
@@ -249,4 +244,12 @@ int lkreport(int fd, uint16_t flags)
     }
 
     return -errno;
+}
+
+/**
+ * Report wrapper - used for atexit().
+ */
+void lkreport_wrapper()
+{
+    lkreport(fileno(stderr), LKR_SERIOUS | LKR_BAD_FREE);
 }
