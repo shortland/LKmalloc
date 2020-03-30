@@ -5,19 +5,16 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
-#include "Tables.c"
 #include "Flags.h"
-
-#define lkmalloc(size, ptr, flags) __lkmalloc_internal((size), (ptr), (flags), __FILE__, __func__, __LINE__)
-
-#define lkfree(ptr, flags) __lkfree_internal((ptr), (flags), __FILE__, __func__, __LINE__, NULL, (flags))
+#include "LKmalloc.h"
+#include "Tables.c"
 
 /**
  * This will ask to allocate "size" bytes, and if successful, assign the newly allocated address to *ptr. 
  * By passing an addr or a ptr to lkmalloc(), you can do more intelligent checking of bugs. 
  * lkmalloc() should return 0 on success -errno on failure (e.g., -ENOMEM).
  */
-int __lkmalloc_internal(uint64_t size, void **ptr, uint16_t flags, const char *file, const char *func, int line)
+int _lkmalloc_internal(uint64_t size, void **ptr, uint16_t flags, const char *file, const char *func, int line)
 {
     errno = 0;
 
@@ -67,7 +64,7 @@ int __lkmalloc_internal(uint64_t size, void **ptr, uint16_t flags, const char *f
     {
         // simply do a regular alloc, then memset to 0's.
         int res = 0;
-        if ((res = __lkmalloc_internal(size, ptr, (flags & ~LKM_INIT) | LKM_REG, file, func, line)) < 0)
+        if ((res = _lkmalloc_internal(size, ptr, (flags & ~LKM_INIT) | LKM_REG, file, func, line)) < 0)
         {
             return res;
         }
@@ -88,7 +85,7 @@ int __lkmalloc_internal(uint64_t size, void **ptr, uint16_t flags, const char *f
  * This'll take the addr of the ptr that was presumably allocated by lkmalloc (but maybe not), and attempt to free it. 
  * Return 0 on success, -errno on failure (e.g., -EINVAL, etc.).
  */
-int __lkfree_internal(void **ptr, uint16_t flags, const char *file, const char *func, int line, void **original, uint16_t rflags)
+int _lkfree_internal(void **ptr, uint16_t flags, const char *file, const char *func, int line, void **original, uint16_t rflags)
 {
     errno = 0;
 
@@ -102,10 +99,10 @@ int __lkfree_internal(void **ptr, uint16_t flags, const char *file, const char *
         MALLOCS_TABLE *table;
         if ((table = _lk_find_malloc_table_with_ptr_near(ptr, flags)) != NULL)
         {
-            return __lkfree_internal(&(table->malloc_ptr), (flags & ~LKF_APPROX) | LKF_REG, file, func, line, ptr, rflags);
+            return _lkfree_internal(&(table->malloc_ptr), (flags & ~LKF_APPROX) | LKF_REG, file, func, line, ptr, rflags);
         }
 
-        return __lkfree_internal(ptr, (flags & ~LKF_APPROX) | LKF_REG, file, func, line, ptr, rflags);
+        return _lkfree_internal(ptr, (flags & ~LKF_APPROX) | LKF_REG, file, func, line, ptr, rflags);
     }
 
     if ((flags & LKF_REG) == 0)

@@ -2,19 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "LKmalloc.c"
+
+#include "LKmalloc.h"
 
 int main(int argc, char *argv[])
 {
-    // /**
-    //  * Bind atexit - will show a report regardless if exiting with negative code.
-    //  */
-    // if (atexit(lkreport_wrapper) != 0)
-    // {
-    //     perror("Error, unable to bind atexit()");
-    //     exit(1);
-    // }
-
     /**
      * Try and write the output to a CSV file
      */
@@ -25,10 +17,10 @@ int main(int argc, char *argv[])
     }
 
     /**
-     * Example 1:
+     * Test 1:
      * 4 mallocs, and 2 frees - results in 2 memory leaks & 2 matching mallocs.
      */
-    fprintf(stdout, "\nExample 1: 2 memleaks and 2 matching malloc-free's on line %d.\n", __LINE__);
+    fprintf(stdout, "\nTest 1: 2 memleaks and 2 matching malloc-free's on line %d.\n", __LINE__);
 
     char *tmp1 = NULL;
     if (lkmalloc(16, (void **)(&tmp1), LKM_REG) < 0)
@@ -75,7 +67,7 @@ int main(int argc, char *argv[])
     }
 
     /**
-     * Cleanup example 1
+     * Cleanup Test 1
      */
     if (lkfree((void **)(&tmp1), LKF_REG) < 0 || lkfree((void **)(&tmp3), LKF_REG) < 0)
     {
@@ -85,10 +77,10 @@ int main(int argc, char *argv[])
     }
 
     /**
-     * Example 2:
+     * Test 2:
      * 1 malloc with setting the space to 0's initially
      */
-    fprintf(stdout, "\nExample 2: Attempting to malloc with it's space initialized to 0's.\n");
+    fprintf(stdout, "\nTest 2: Attempting to malloc with it's space initialized to 0's.\n");
 
     char *cleared_space = NULL;
     if (lkmalloc(8, (void **)(&cleared_space), LKM_INIT) < 0)
@@ -99,7 +91,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "The space is: '%d%d%d%d%d%d%d%d' (showing as decimal values)\n", cleared_space[0], cleared_space[1], cleared_space[2], cleared_space[3], cleared_space[4], cleared_space[5], cleared_space[6], cleared_space[7]);
 
     /**
-     * Cleanup example 2
+     * Cleanup Test 2
      */
     if (lkfree((void **)(&cleared_space), LKF_REG) < 0)
     {
@@ -107,10 +99,10 @@ int main(int argc, char *argv[])
     }
 
     /**
-     * Example 3:
+     * Test 3:
      * Free a non-valid address (should be error)
      */
-    fprintf(stdout, "\nExample 3: Free an address that isn't valid (wasn't previously malloc'd).\n");
+    fprintf(stdout, "\nTest 3: Free an address that isn't valid (wasn't previously malloc'd).\n");
 
     char *invalid_free = "hello world";
     if (lkfree((void **)(&invalid_free), LKF_REG | LKF_UNKNOWN) < 0)
@@ -119,10 +111,10 @@ int main(int argc, char *argv[])
     }
 
     /**
-     * Example 4:
+     * Test 4:
      * Pass address that's not the exact address of a malloc (it's within the address space of the malloc)
      */
-    fprintf(stdout, "\nExample 4: Free the middle of a malloc'd address.\n");
+    fprintf(stdout, "\nTest 4: Free the middle of a malloc'd address.\n");
 
     char *middle_free_original = "abc";
     if (lkmalloc(48, (void **)(&middle_free_original), LKM_INIT) < 0)
@@ -145,6 +137,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "error: lkfree() returned with an error on line %d.\n", __LINE__);
     }
 
+    fprintf(stdout, "\nMisc. Reports.\n");
     if (lkreport(fileno(csv), LKR_BAD_FREE) < 0)
     {
         fprintf(stderr, "error: there was an error calling lkreport on line %d.\n", __LINE__);
