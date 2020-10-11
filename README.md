@@ -1,10 +1,7 @@
-# LKmalloc - Homework 2
+# LKmalloc
 
 A malloc-debugging library.
 A wrapper around malloc.
-
-
-By: Ilan Kleiman, 110942711
 
 ## Compile and Running Testsuite
 
